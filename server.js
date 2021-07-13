@@ -49,11 +49,21 @@ const typeDefs = gql`
 // There have to be resolvers for each field in each type of schema
 // If there isn't, Apollo will define default resolvers for them, these are accessed through the root parameter (root being the object)
 // Person: { name: (root) => root.name} is the same as person.name in this case
+
+// Since the persons in the array do not have an address field, we have to add a resolver that returns the street and city when there is a query for address
 const resolvers = {
 	Query: {
 		personCount: () => persons.length,
 		allPersons: () => persons,
 		findPerson: (root, args) => persons.find((p) => p.name === args.name),
+	},
+	Person: {
+		address: (root) => {
+			return {
+				street: root.street,
+				city: root.city,
+			}
+		},
 	},
 }
 
