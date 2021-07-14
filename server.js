@@ -1,4 +1,5 @@
 const { ApolloServer, gql } = require('apollo-server')
+const { v1: uuidv1 } = require('uuid')
 
 let persons = [
 	{
@@ -43,6 +44,15 @@ const typeDefs = gql`
 		allPersons: [Person!]!
 		findPerson(name: String!): Person
 	}
+
+	type Mutation {
+		addPerson(
+			name: String!
+			phone: String
+			street: String!
+			city: String!
+		): Person
+	}
 `
 
 // Resolvers is how GraphQL should respond to these queries (the logic behind the queries)
@@ -51,6 +61,7 @@ const typeDefs = gql`
 // Person: { name: (root) => root.name} is the same as person.name in this case
 
 // Since the persons in the array do not have an address field, we have to add a resolver that returns the street and city when there is a query for address
+// So when a Person object gets returned, every field is using it's default resolver to return the object except for the address field
 const resolvers = {
 	Query: {
 		personCount: () => persons.length,
@@ -63,6 +74,14 @@ const resolvers = {
 				street: root.street,
 				city: root.city,
 			}
+		},
+	},
+	Mutation: {
+		addPerson: (root, args) => {
+			const id = uuidv1()
+			const person = { ...args, id }
+			persons = persons.concat(person)
+			return person
 		},
 	},
 }
