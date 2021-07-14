@@ -26,6 +26,11 @@ let persons = [
 
 // GraphQL Schema
 // The exclamation mark tells that the fields for Person and the return values for the query has to have a value (not be null)
+
+// Types
+// Mutation: This is a type used for operations that cause change
+// Enum: A type used to restrict the data returned by the set values, the values being YES & NO in this case (it's nullable so could be left out)
+
 const typeDefs = gql`
 	type Address {
 		street: String!
@@ -39,9 +44,14 @@ const typeDefs = gql`
 		id: ID!
 	}
 
+	enum YesNo {
+		YES
+		NO
+	}
+
 	type Query {
 		personCount: Int!
-		allPersons: [Person!]!
+		allPersons(phone: YesNo): [Person!]!
 		findPerson(name: String!): Person
 	}
 
@@ -65,7 +75,19 @@ const typeDefs = gql`
 const resolvers = {
 	Query: {
 		personCount: () => persons.length,
-		allPersons: () => persons,
+		allPersons: (root, args) => {
+			if (!args.phone) {
+				return persons
+			}
+
+			// YES: only returns person object if it has a phone prop
+			// NO: returns person without phone prop
+			const personsWithPhone = (person) => {
+				return args.phone === 'YES' ? person.phone : !person.phone
+			}
+
+			return persons.filter(personsWithPhone)
+		},
 		findPerson: (root, args) => persons.find((p) => p.name === args.name),
 	},
 	Person: {
