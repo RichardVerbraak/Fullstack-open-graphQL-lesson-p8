@@ -62,6 +62,7 @@ const typeDefs = gql`
 			street: String!
 			city: String!
 		): Person
+		editNumber(name: String!, phone: String!): Person
 	}
 `
 
@@ -72,6 +73,28 @@ const typeDefs = gql`
 
 // Since the persons in the array do not have an address field, we have to add a resolver that returns the street and city when there is a query for address
 // So when a Person object gets returned, every field is using it's default resolver to return the object except for the address field
+
+// You can have multiple types of queries like so and also multiple of the same query (have to give alternative name)
+// It's also beneficial to name the query like the last example
+
+//// Multiple
+// query {
+// 	personCount
+// 	allPersons {
+// 		name
+// 	}
+// }
+
+// Multiple of the same
+// query PhoneOwnerShip {
+// 	hasPhone: allPersons(phone: YES) {
+// 		name
+// 	}
+// 	phoneless: allPersons(phone: NO) {
+// 		name
+// 	}
+// }
+
 const resolvers = {
 	Query: {
 		personCount: () => persons.length,
@@ -114,6 +137,24 @@ const resolvers = {
 			const person = { ...args, id }
 			persons = persons.concat(person)
 			return person
+		},
+		editNumber: (root, args) => {
+			const person = persons.find((person) => {
+				return person.name === args.name
+			})
+
+			if (!person) {
+				return null
+			}
+
+			const updatedPerson = { ...person, phone: args.phone }
+
+			// Update the persons array on the server
+			persons.map((person) => {
+				return p.name === args.name ? updatedPerson : person
+			})
+
+			return updatedPerson
 		},
 	},
 }
