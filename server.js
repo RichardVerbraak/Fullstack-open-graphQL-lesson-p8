@@ -151,7 +151,7 @@ const resolvers = {
 
 			// Update the persons array on the server
 			persons.map((person) => {
-				return p.name === args.name ? updatedPerson : person
+				return person.name === args.name ? updatedPerson : person
 			})
 
 			return updatedPerson
